@@ -1,6 +1,6 @@
 # Python Google Images Downloader
 Python functions for 'searching' and 'downloading' Google images/image links.<br />
-Download and process the standard html page of google images.
+Download and process the standard html page of google images.<br />
 This software is a modification of the original software: https://github.com/hardikvasa/google-images-download
 ## Summary
 This is a Python program to search keywords/key-phrases on Google Images and then also optionally download all Images. 
