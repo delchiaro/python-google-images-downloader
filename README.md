@@ -11,20 +11,27 @@ Tested only on python 2.7
 ## Limitations
 Can download max 100 images per query (html page retrived contains 100 images/links).
 
+## Install
+git clone https://github.com/nagash91/python-google-images-downloader.git <br />
+cd python-google-images-downloader <br />
+sudo python setup.py install <br />
+ <br />
+ 
 ## Usage
 ```python
-google_image_search(search_keyword='cat',               # string or list of strings
-                    max_download_per_keyword=100,      
-                    extension_whitelist=None,           # whitelist for file extensions
-                    extension_blacklist=None,           # blacklist for file extensions
-                    replace_extension_not_in_whitelist='.jpg', # whitelist behaviour
+# Download images in 'download_img' folder and return links of the downloaded images
+links = google_image_download(search_keyword='cat',               # string or list of strings
+                              max_download_per_keyword=100,      
+                              extension_whitelist=None,           # whitelist for file extensions
+                              extension_blacklist=None,           # blacklist for file extensions
+                              replace_extension_not_in_whitelist='.jpg', # whitelist behaviour
 
-                    download_img_path="",               # where to download images 
-                    image_file_prefix='google_',        # prefix for downloaded image names
-                    links_file_output='gdownlinks.txt', # file with image links
+                              download_img_path="download_imgs",  # where to download images 
+                              image_file_prefix='google_',        # prefix for downloaded image names
+                              links_file_output='gdownlinks.txt', # file with image links
 
-                    verbose=True,
-                    ignore_errors=False)
+                              verbose=True,
+                              ignore_errors=False)
 ```
 
 ## Disclaimer
