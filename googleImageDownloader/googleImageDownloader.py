@@ -9,7 +9,6 @@
 import os
 import time
 import sys
-from shutil import rmtree
 
 
 def download_html_page(url):
@@ -59,7 +58,7 @@ def _find_next_image_link(google_img_html):
         return content_raw, end_content
 
 
-def _get_images_links(html_page, max_items=100, extension_whitelist=None, extension_blacklist=None):
+def google_images_links(html_page, max_items=100, extension_whitelist=None, extension_blacklist=None):
     # example: extension_whitelist = ['.jpg', '.jpeg', '.bmp', '.png']
     lower_whitelist = []
     if extension_whitelist is not None:
@@ -91,19 +90,19 @@ def _get_images_links(html_page, max_items=100, extension_whitelist=None, extens
 
 
 
-def google_image_search(search_keyword='cat',
+def google_image_download(search_keyword='cat',
 
-                        max_download_per_keyword=100,
-                        extension_whitelist=None,
-                        extension_blacklist=None,
-                        replace_extension_not_in_whitelist='.jpg',
+                          max_download_per_keyword=100,
+                          extension_whitelist=None,
+                          extension_blacklist=None,
+                          replace_extension_not_in_whitelist='.jpg',
 
-                        download_img_path="",
-                        image_file_prefix='google_',
-                        links_file_output='gdownlinks.txt',
+                          download_img_path="",
+                          image_file_prefix='google_',
+                          links_file_output=None,
 
-                        verbose=True,
-                        ignore_errors=False):
+                          verbose=True,
+                          ignore_errors=False):
     """
 
     :param search_keyword: string or list of queries for google image search (don't worry about spaces in keyword).
@@ -128,7 +127,7 @@ def google_image_search(search_keyword='cat',
     :param verbose: output on terminal (true or false)
     :param ignore_errors: don't print errors in terminal.
 
-    :return: None
+    :return: list of links fetched.
     """
     t0 = time.time()
 
@@ -157,8 +156,8 @@ def google_image_search(search_keyword='cat',
 
         raw_html = download_html_page(url)
         time.sleep(0.1)
-        img_links += _get_images_links(raw_html, max_items=max_download_per_keyword,
-                                       extension_whitelist=filter_whitelist, extension_blacklist=extension_blacklist)
+        img_links += google_images_links(raw_html, max_items=max_download_per_keyword,
+                                         extension_whitelist=filter_whitelist, extension_blacklist=extension_blacklist)
 
         if verbose:
             # print ("Image Links = "+str(items))
@@ -225,6 +224,8 @@ def google_image_search(search_keyword='cat',
         print("All are downloaded")
     if verbose or not ignore_errors:
         print("\n" + str(error_count) + " ----> total Errors")
+
+    return img_links
 
 
 
