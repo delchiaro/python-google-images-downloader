@@ -131,7 +131,7 @@ def google_image_download(search_keyword='cat',
     """
     t0 = time.time()
 
-    if isinstance(search_keyword, str):
+    if isinstance(search_keyword, str) or isinstance(search_keyword, unicode):
         search_keyword = [search_keyword]
     if links_file_output is not None:
         if os.path.exists(links_file_output):
@@ -144,6 +144,9 @@ def google_image_download(search_keyword='cat',
 
     i = 0
     for sk in search_keyword:
+        if verbose:
+            print("Download using keyword: " + sk)
+
         img_links = []
         if verbose:
             iteration = "Item no.: " + str(i) + " -->" + " Item name = " + str(search_keyword)
