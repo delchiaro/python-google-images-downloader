@@ -101,6 +101,7 @@ def google_image_download(search_keyword=u'cat',
 
                           download_img_path="",
                           image_file_prefix='google_',
+                          image_file_postfix="_",
                           links_file_output=None,
 
                           verbose=True,
@@ -230,7 +231,9 @@ def google_image_download(search_keyword=u'cat',
                     (extension_whitelist is None or extension not in extension_whitelist):
                 extension = replace_extension_not_in_whitelist
 
-            output_file = open(os.path.join(download_img_path, image_file_prefix + str(k-error_count) + extension), 'wb')
+            output_file = open(os.path.join(download_img_path, image_file_prefix + image_file_postfix + str(k-error_count)
+                                            + extension), 'wb')
+
             output_file.write(data)
             output_file.close()
             if verbose:
