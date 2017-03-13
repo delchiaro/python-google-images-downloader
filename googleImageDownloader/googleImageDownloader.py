@@ -10,6 +10,7 @@ import os
 import time
 import sys
 import ssl
+import urllib2
 
 
 def download_html_page(url):
@@ -105,7 +106,9 @@ def google_image_download(search_keyword=u'cat',
                           verbose=True,
                           ignore_errors=False,
                           if_error_download_another=True,
-                          image_download_timeout=7):
+                          image_download_timeout=7,
+                          link_download_retry=3,
+                          link_download_retry_sleep=0.5):
     """
 
     :param search_keyword: string or list of queries for google image search (don't worry about spaces in keyword).
@@ -161,15 +164,16 @@ def google_image_download(search_keyword=u'cat',
             iteration = u"Item no.: " + unicode(i) + u" -->" + u" Item name = " + sk
             print (iteration)
             print ("Evaluating...")
-        search = sk.replace(' ', '%20')
-        search = iriToUri(search)
+        #search = sk.replace(' ', '%20')
+        #search = iriToUri(sk)
+        search = urllib2.quote(sk.encode('utf-8'))
         url = u'https://www.google.com/search?q=' + search \
               + u'&espv=2&biw=1366&bih=667&site=webhp&source=lnms&tbm=isch&sa=X&ei=XosDVaCXD8TasATItgE&ved=0CAcQ_AUoAg'
 
         query_img_links = []
+        retry = 0
         while len(query_img_links) == 0:
             raw_html = download_html_page(url)
-
             max_items = max_download_per_keyword
             if if_error_download_another:
                 max_items = 100
@@ -177,7 +181,11 @@ def google_image_download(search_keyword=u'cat',
                 query_img_links = google_images_links(raw_html, max_items=max_items,
                                              extension_whitelist=filter_whitelist, extension_blacklist=extension_blacklist)
             if len(query_img_links) == 0:
-                time.sleep(0.2)
+                time.sleep(link_download_retry_sleep)
+                retry += 1
+                if retry > link_download_retry:
+                    break
+
         total_img_links += query_img_links
 
     if verbose:
@@ -210,43 +218,48 @@ def google_image_download(search_keyword=u'cat',
         try:
             req = Request(total_img_links[k], headers={
                 "User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.27 Safari/537.17"})
+
             response = urlopen(req, timeout=image_download_timeout)
+            data = response.read()
+            response.close()
+
             extension = os.path.splitext(total_img_links[k])[1].lower()
             if extension is None:
                 extension = ""
             if replace_extension_not_in_whitelist and \
-                    (extension_whitelist is None  or  extension not in extension_whitelist):
+                    (extension_whitelist is None or extension not in extension_whitelist):
                 extension = replace_extension_not_in_whitelist
-            output_file = open(os.path.join(download_img_path, image_file_prefix + str(k) + extension), 'wb')
-            data = response.read()
+
+            output_file = open(os.path.join(download_img_path, image_file_prefix + str(k-error_count) + extension), 'wb')
             output_file.write(data)
-            response.close()
+            output_file.close()
             if verbose:
-                print("completed ====> " + str(k))
+                print("completed ====> " + str(k-error_count))
 
         # IN this saving process we are just skipping the URL if there is any error
         except IOError as e:  # If there is any IOError
             error = True
             if not ignore_errors:
-                print("IOError on image: {}".format(k))
+                print("IOError on image: {}".format(k-error_count))
 
         except HTTPError as e:  # If there is any HTTPError
             error = True
             if not ignore_errors:
-                print("HTTPError '{}'  on image: {}".format(e.message, k))
+                print("HTTPError '{}'  on image: {}".format(e.message, k-error_count))
         except ssl.CertificateError as e:
             error = True
             if not ignore_errors:
-                print("ssl.CertificateError '{}'  on image: {}".format(e.message, k))
+                print("ssl.CertificateError '{}'  on image: {}".format(e.message, k-error_count))
         except URLError as e:
             error = True
             if not ignore_errors:
-                print("URLError '{}' on image: {}".format(e.message, k))
+                print("URLError '{}' on image: {}".format(e.message, k-error_count))
 
         except Exception as e:
             error = True
             if not ignore_errors:
-                print("Unknown Exception '{}' on image: {}".format(e.message, k))
+                print("Unknown Exception '{}' on image: {}".format(e.message, k-error_count))
+
         if error:
             error_count += 1
             if if_error_download_another:
@@ -267,12 +280,15 @@ import re, urlparse
 def urlEncodeNonAscii(b):
     return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
 
-def iriToUri(iri):
-    parts= urlparse.urlparse(iri)
-    return urlparse.urlunparse(
-        part.encode('idna') if parti==1 else urlEncodeNonAscii(part.encode('utf-8'))
-        for parti, part in enumerate(parts)
-    )
+
+
+# USE urllib2.quote instead
+# def iriToUri(iri):
+#     parts= urlparse.urlparse(iri)
+#     return urlparse.urlunparse(
+#         part.encode('idna') if parti==1 else urlEncodeNonAscii(part.encode('utf-8'))
+#         for parti, part in enumerate(parts)
+#     )
 
 # Example of usage (white and black list):
 
