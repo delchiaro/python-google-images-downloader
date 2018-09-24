@@ -14,7 +14,7 @@ Can download max 100 images per query (html page retrived contains 100 images/li
 ## Install
 git clone https://github.com/nagash91/python-google-images-downloader.git <br />
 cd python-google-images-downloader <br />
-sudo python setup.py install <br />
+python setup.py install <br />
  <br />
  
 ## Usage
